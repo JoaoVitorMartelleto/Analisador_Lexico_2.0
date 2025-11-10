@@ -30,16 +30,27 @@ public class Scanner {
     }
 
     private void initKeywords() {
+        keywords.put("main", TokenType.KW_MAIN);
+        keywords.put("var", TokenType.KW_VAR);
         keywords.put("int", TokenType.KW_INT);
-        keywords.put("float", TokenType.KW_FLOAT);
+        keywords.put("real", TokenType.KW_REAL);
+        keywords.put("input", TokenType.KW_INPUT);
         keywords.put("print", TokenType.KW_PRINT);
         keywords.put("if", TokenType.KW_IF);
+        keywords.put("then", TokenType.KW_THEN);
         keywords.put("else", TokenType.KW_ELSE);
+        keywords.put("while", TokenType.KW_WHILE);
+        keywords.put("E", TokenType.KW_E);
+        keywords.put("OU", TokenType.KW_OU);
+        keywords.put("NAO", TokenType.KW_NAO);
+        keywords.put("e", TokenType.KW_E);
+        keywords.put("ou", TokenType.KW_OU);
+        keywords.put("nao", TokenType.KW_NAO);
     }
 
     public Token nextToken() {
         skipWhitespaceAndComments();
-        if (isEoF()) return null;
+        if (isEoF()) return new Token(TokenType.EOF, "", line, column);
 
         int tokenLine = line;
         int tokenCol = column;
@@ -52,8 +63,9 @@ public class Scanner {
                 sb.append(advance());
             }
             String lexeme = sb.toString();
-            if (keywords.containsKey(lexeme)) {
-                return new Token(keywords.get(lexeme), lexeme, tokenLine, tokenCol);
+            TokenType kw = keywords.get(lexeme);
+            if (kw != null) {
+                return new Token(kw, lexeme, tokenLine, tokenCol);
             }
             return new Token(TokenType.IDENTIFIER, lexeme, tokenLine, tokenCol);
         }
@@ -83,9 +95,37 @@ public class Scanner {
             }
         }
 
+        if (c == '"') {
+            StringBuilder sb = new StringBuilder();
+            while (!isEoF() && peek() != '"') {
+                char ch = advance();
+                if (ch == '\\' && !isEoF()) {
+                    char esc = advance();
+                    switch (esc) {
+                        case 'n': sb.append('\n'); break;
+                        case 't': sb.append('\t'); break;
+                        case '"': sb.append('"'); break;
+                        case '\\': sb.append('\\'); break;
+                        default: sb.append(esc); break;
+                    }
+                } else {
+                    sb.append(ch);
+                }
+            }
+            if (peek() != '"') {
+                throw new LexicalException("Cadeia não fechada", tokenLine, tokenCol);
+            }
+            advance();
+            return new Token(TokenType.CADEIA, sb.toString(), tokenLine, tokenCol);
+        }
+
         switch (c) {
-            case '+': return new Token(TokenType.PLUS, "+", tokenLine, tokenCol);
-            case '-': return new Token(TokenType.MINUS, "-", tokenLine, tokenCol);
+            case '+':
+                if (peek() == '+') { advance(); return new Token(TokenType.PLUSPLUS, "++", tokenLine, tokenCol); }
+                return new Token(TokenType.PLUS, "+", tokenLine, tokenCol);
+            case '-':
+                if (peek() == '-') { advance(); return new Token(TokenType.MINUSMINUS, "--", tokenLine, tokenCol); }
+                return new Token(TokenType.MINUS, "-", tokenLine, tokenCol);
             case '*': return new Token(TokenType.STAR, "*", tokenLine, tokenCol);
             case '/':
                 return new Token(TokenType.SLASH, "/", tokenLine, tokenCol);
@@ -96,15 +136,18 @@ public class Scanner {
                 if (peek() == '=') { advance(); return new Token(TokenType.GTE, ">=", tokenLine, tokenCol); }
                 return new Token(TokenType.GT, ">", tokenLine, tokenCol);
             case '<':
+                if (peek() == '-') { advance(); return new Token(TokenType.ASSIGN_ARROW, "<-", tokenLine, tokenCol); }
                 if (peek() == '=') { advance(); return new Token(TokenType.LTE, "<=", tokenLine, tokenCol); }
                 return new Token(TokenType.LT, "<", tokenLine, tokenCol);
             case '!':
                 if (peek() == '=') { advance(); return new Token(TokenType.NEQ, "!=", tokenLine, tokenCol); }
                 throw new LexicalException("Símbolo inválido: '!'", tokenLine, tokenCol);
-            case '(':
-                return new Token(TokenType.LPAREN, "(", tokenLine, tokenCol);
-            case ')':
-                return new Token(TokenType.RPAREN, ")", tokenLine, tokenCol);
+            case '(': return new Token(TokenType.LPAREN, "(", tokenLine, tokenCol);
+            case ')': return new Token(TokenType.RPAREN, ")", tokenLine, tokenCol);
+            case '{': return new Token(TokenType.LBRACE, "{", tokenLine, tokenCol);
+            case '}': return new Token(TokenType.RBRACE, "}", tokenLine, tokenCol);
+            case ':': return new Token(TokenType.COLON, ":", tokenLine, tokenCol);
+            case ';': return new Token(TokenType.SEMICOLON, ";", tokenLine, tokenCol);
             default:
                 throw new LexicalException("Símbolo inválido: '" + c + "'", tokenLine, tokenCol);
         }
@@ -175,4 +218,7 @@ public class Scanner {
     private boolean isEoF() {
         return pos >= source.length;
     }
+
+    public int getLine() { return line; }
+    public int getColumn() { return column; }
 }
