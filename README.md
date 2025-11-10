@@ -1,24 +1,32 @@
-# 📖 Analisador Léxico – Checkpoint 01  
+# 📖 Analisador Léxico – Checkpoint 02  
 
-Projeto desenvolvido para a disciplina **Construção de Compiladores I**, como parte do **Checkpoint 01**.  
-
-O objetivo foi implementar um **Analisador Léxico** em **Java**, sem o uso de ferramentas automáticas, reconhecendo tokens básicos de uma linguagem simples.  
+Projeto desenvolvido para a disciplina Construção de Compiladores, como continuação do Checkpoint 01 (Analisador Léxico).   
+Neste checkpoint foi implementado o Analisador Sintático, responsável por validar a estrutura gramatical de programas escritos na linguagem definida pelo Professor.
 
 ---
 
 ## 🚀 Funcionalidades implementadas  
 
-✔️ Identificadores: `(a-z | A-Z | _)(a-z | A-Z | _ | 0-9)*`  
-✔️ Operadores matemáticos: `+ - * /`  
-✔️ Operador de atribuição: `=`  
-✔️ Operadores relacionais: `> >= < <= != ==`  
-✔️ Parênteses: `(` e `)`  
-✔️ Constantes numéricas inteiras e decimais (ex.: `123`, `123.456`, `.456`)  
-✔️ Palavras reservadas: `int`, `float`, `print`, `if`, `else`  
-✔️ Comentários:  
-   - Linha: `# ...` ou `// ...`  
-   - Bloco: `/* ... */`  
-✔️ Tratamento de erros léxicos com **linha e coluna**  
+📢​ Identifica tokens:   
+
+- Palavras reservadas, identificadores, números inteiros e reais, operadores e delimitadores;   
+- Realiza tratamento de erros léxicos com número de linha e coluna;   
+- Suporta comentários de linha e bloco;   
+- Integra-se com o analisador sintático via classe Scanner.   
+
+📢​ Analisador Sintático :  
+
+- Implementa um parser recursivo-descendente em Java;   
+- Segue a gramática livre de contexto definida para a linguagem;   
+- Detecta erros sintáticos e exibe mensagens descritivas com posição no código;   
+- Reconhece:   
+-- Declarações de variáveis (var { ... });   
+-- Estruturas condicionais (if, else);   
+-- Estruturas de repetição (while);   
+-- Entrada (input) e saída (print);   
+-- Expressões aritméticas, relacionais e lógicas (E, OU, NAO);   
+-- Operadores de incremento e decremento (++, --);   
+-- Blocos de comandos delimitados por { ... }.   
 
 ---
 
@@ -30,11 +38,13 @@ Analisador_Lexico/
 │ │ ├── Scanner.java
 │ │ ├── Token.java
 │ │ ├── LexicalException.java
+│ │ ├── SyntaxException.java
+│ │ └── Parser.java
 │ ├── util/
 │ │ └── TokenType.java
 │ ├── mini_compiler/
 │ │ └── Main.java
-│── programa.mc 
+│── programa_ckp2_qui_noite.txt 
 │── .gitignore
 
 ```
@@ -56,17 +66,22 @@ java mini_compiler.Main
 ## 📝 Exemplo de entrada (programa.mc)
 
 ```c
-int a = 10 
-float b = 3.14 
-float c = .5 
-print(a + b * (a - 2) / c)
+main {
+    var {
+        x:int;
+        temp:int;
+    }
 
-/* comentário multi-linha */
+    input(x);
+    if (x > z E y <= z OU x != z) then {
+        temp <- z;
+        z <- x;
+        x <- temp;
+    }
 
-if a >= 5 
-    print(a) 
-else 
-    print(b)
+    print("Ordem crescente:");
+    print(x);
+}
 ```
 
 ---
@@ -74,15 +89,15 @@ else
 ## 💻 Exemplo de saída
 
 ```c
-Token[type=KW_INT, lexeme='int', line=2, col=1]
-Token[type=IDENTIFIER, lexeme='a', line=2, col=5]
-Token[type=ASSIGN, lexeme='=', line=2, col=7]
-Token[type=INT_LITERAL, lexeme='10', line=2, col=9]
+Token[type=KW_MAIN, lexeme='main', line=1, col=1]
+Token[type=LBRACE, lexeme='{', line=1, col=6]
+Token[type=KW_VAR, lexeme='var', line=2, col=5]
 ...
-Token[type=KW_ELSE, lexeme='else', line=13, col=1]
-Token[type=KW_PRINT, lexeme='print', line=14, col=1]
-```
+Token[type=KW_PRINT, lexeme='print', line=36, col=5]
+Token[type=EOF, lexeme='', line=37, col=1]
 
+Parse concluído com sucesso!
+```
 ---
 
 ## 👨‍💻 Integrantes
