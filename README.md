@@ -53,12 +53,16 @@ Analisador_Lexico/
 
 ## ▶️ Como executar  
 
-### 1. Compilar os arquivos
-No terminal, dentro da raiz do projeto:  
+### 1. Clone o repositório:                                                                                                                                                                          
+ ```bash                                                                                                                                                                                             
+git clone [https://github.com/JoaoVitorMartelleto/Analisador_Lexico2.0.git]
+ ```
+### 2. No terminal, dentro da raiz do projeto:  
 
 ```bash
 javac util/*.java lexical/*.java mini_compiler/*.java
 ```
+### 3. Execute
 ```bash
 java mini_compiler.Main
 ```
